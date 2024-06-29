@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     id("kotlin-kapt")
+    id ("com.google.dagger.hilt.android")
 }
 
 android {
@@ -53,6 +54,14 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation (libs.androidx.espresso.contrib)
     androidTestImplementation (libs.androidx.espresso.intents)
+
+
+    //////////////////////// Dagger Hilt ////////////////////////
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    //androidTestImplementation  (libs.hilt.android.testing)
+    //kaptAndroidTest (libs.hilt.compiler.v2511)
+    // For local unit tests
+    //testImplementation (libs.hilt.android.testing)
+    //kaptTest (libs.hilt.compiler.v2511)
 }
