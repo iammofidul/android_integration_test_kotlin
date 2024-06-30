@@ -6,10 +6,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 
 interface ApiService {
-
-   /* @POST("/mdkndhb")
-    suspend fun getProducts(@Body jsonObject: JsonObject): Response<ApiResponseData>*/
-
     @GET("posts")
     suspend fun getPosts(): Response<List<Post>>
 }

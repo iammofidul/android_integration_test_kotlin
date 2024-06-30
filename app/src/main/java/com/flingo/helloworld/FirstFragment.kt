@@ -62,7 +62,7 @@ class FirstFragment : Fragment() {
     }
     private fun observePostData() {
         try {
-            mainViewModel.responseposts.observe(this) { response ->
+            mainViewModel.responsePosts.observe(this) {
                 val apiResultHandler = context?.let {
                     ApiResultHandler<List<Post>>(it,
                         onLoading = {
@@ -92,7 +92,7 @@ class FirstFragment : Fragment() {
                             binding.progressBar.visibility = View.GONE
                         })
                 }
-                apiResultHandler?.handleApiResult(response)
+                //apiResultHandler?.handleApiResult(response)
             }
         } catch (e: Exception) {
             e.stackTrace
