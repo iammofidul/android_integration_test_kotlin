@@ -59,9 +59,9 @@ dependencies {
     //////////////////////// Dagger Hilt ////////////////////////
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
-    //androidTestImplementation  (libs.hilt.android.testing)
-    //kaptAndroidTest (libs.hilt.compiler.v2511)
+    androidTestImplementation  (libs.hilt.android.testing)
+    kaptAndroidTest (libs.hilt.compiler.v2511)
     // For local unit tests
-    //testImplementation (libs.hilt.android.testing)
-    //kaptTest (libs.hilt.compiler.v2511)
+    testImplementation (libs.hilt.android.testing)
+    kaptTest (libs.hilt.compiler.v2511)
 }
