@@ -34,16 +34,7 @@ class FirstFragment : Fragment() {
     ): View {
 
         _binding = FragmentFirstBinding.inflate(inflater, container, false)
-        val dataset = arrayOf("Mofidul", "Harun", "Aziz")
-        val customAdapter = ContactRv(dataset, object : OnItemClickListener {
-            override fun onItemClick(position: Int) {
-                findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
-            }
-        })
 
-        val recyclerView: RecyclerView = binding.recyclerView
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = customAdapter
         return binding.root
 
     }
@@ -80,6 +71,22 @@ class FirstFragment : Fragment() {
                         onSuccess = { data ->
                             println(data)
                             binding.progressBar.visibility = View.GONE
+
+                            var dataset = arrayOf("")
+
+                            data?.let {posts ->
+                                dataset = Array(posts.size) { i -> posts[i].title.toString() }
+
+                            }
+                            val customAdapter = ContactRv(dataset, object : OnItemClickListener {
+                                override fun onItemClick(position: Int) {
+                                    findNavController().navigate(R.id.action_FirstFragment_to_SecondFragment)
+                                }
+                            })
+
+                            val recyclerView: RecyclerView = binding.recyclerView
+                            recyclerView.layoutManager = LinearLayoutManager(context)
+                            recyclerView.adapter = customAdapter
                         },
                         onFailure = {
                             binding.progressBar.visibility = View.GONE
