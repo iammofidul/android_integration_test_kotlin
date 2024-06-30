@@ -30,37 +30,15 @@ inline fun <reified T> toResultFlow(context: Context, crossinline call: suspend 
                             emit(NetWorkResult.Success(it))
                         }
                     } else {
-                        val model = setResponseStatus<T>(T::class.java.getDeclaredConstructor().newInstance(), response.code().toString(), response.message())
-                        emit(NetWorkResult.Error(model, response.message()))
+                        emit(NetWorkResult.Error(null, response.message()))
                     }
                 } catch (e: Exception) {
-                    val model = setResponseStatus<T>(T::class.java.getDeclaredConstructor().newInstance(), API_FAILED_CODE, e.message)
-                    emit(NetWorkResult.Error(model, e.toString()))
+                    emit(NetWorkResult.Error(null, e.toString()))
                 }
             }
         } else {
-            val model = setResponseStatus<T>(T::class.java.getDeclaredConstructor().newInstance(),
-                API_INTERNET_CODE, API_INTERNET_MESSAGE)
-            emit(NetWorkResult.Error(model, API_INTERNET_MESSAGE))
+            emit(NetWorkResult.Error(null, API_INTERNET_MESSAGE))
         }
     }.flowOn(Dispatchers.IO)
 }
 
-inline fun <reified T> setResponseStatus(instance: T?, errorCode: String?, message: String?):T? {
-    return try {
-        instance?.let {
-            val properties = it::class.memberProperties
-            for (property in properties) {
-                if (property is KMutableProperty<*>) {
-                    when (property.name) {
-                        "ErrorCode" -> (property as KMutableProperty<*>).setter.call(instance, errorCode)
-                        "Message" -> (property as KMutableProperty<*>).setter.call(instance, message)
-                    }
-                }
-            }
-        }
-        instance
-    } catch (e: Exception) {
-        null
-    }
-}
