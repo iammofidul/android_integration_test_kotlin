@@ -62,18 +62,14 @@ class FirstFragment : Fragment() {
     }
     private fun observePostData() {
         try {
-            mainViewModel.responsePosts.observe(this) {
-                val apiResultHandler = context?.let {
-                    ApiResultHandler<List<Post>>(it,
+            mainViewModel.responsePosts.observe(this) {response->
+                val apiResultHandler = ApiResultHandler<List<Post>>(requireContext(),
                         onLoading = {
                             binding.progressBar.visibility = View.VISIBLE
                         },
                         onSuccess = { data ->
-                            println(data)
                             binding.progressBar.visibility = View.GONE
-
                             var dataset = arrayOf("")
-
                             data?.let {posts ->
                                 dataset = Array(posts.size) { i -> posts[i].title.toString() }
 
@@ -91,8 +87,8 @@ class FirstFragment : Fragment() {
                         onFailure = {
                             binding.progressBar.visibility = View.GONE
                         })
-                }
-                //apiResultHandler?.handleApiResult(response)
+
+                apiResultHandler.handleApiResult(response)
             }
         } catch (e: Exception) {
             e.stackTrace
