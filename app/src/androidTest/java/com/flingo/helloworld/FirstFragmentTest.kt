@@ -120,7 +120,7 @@ class FirstFragmentTest {
             this.callback = callback
         }
     }
-    fun clickOnButtonInRecyclerView(itemPosition: Int, buttonId: Int): ViewAction {
+    private fun clickOnButtonInRecyclerView(itemPosition: Int, buttonId: Int): ViewAction {
         return object : ViewAction {
             override fun getConstraints(): Matcher<View>? {
                 return null

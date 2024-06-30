@@ -64,4 +64,27 @@ dependencies {
     // For local unit tests
     testImplementation (libs.hilt.android.testing)
     kaptTest (libs.hilt.compiler.v2511)
+
+
+    //////////////////////// Retrofit ////////////////////////
+
+    implementation (libs.retrofit)
+    implementation (libs.converter.gson)
+    implementation (libs.logging.interceptor)
+    implementation (libs.converter.scalars)
+
+
+
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation (libs.androidx.lifecycle.extensions)
+    implementation (libs.androidx.activity.ktx)
+
+    //Coroutines
+    implementation (libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+
+    implementation(libs.kotlin.reflect)
+
+
+
 }
