@@ -1,6 +1,7 @@
 package com.flingo.helloworld.di
 
 import com.flingo.helloworld.data.ApiService
+import com.flingo.helloworld.util.Constants.Companion.BASE_URL_GET
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,7 +38,7 @@ object NetworkClient {
         gsonConverterFactory: GsonConverterFactory
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://jsonplaceholder.typicode.com/")
+            .baseUrl(BASE_URL_GET)
             .client(okHttpClient)
             .addConverterFactory(gsonConverterFactory)
             .build()
