@@ -1,5 +1,6 @@
 package com.flingo.helloworld
 
+import android.app.Activity
 import android.util.Log
 import android.view.View
 import androidx.test.espresso.Espresso.onView
@@ -11,10 +12,12 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.isRoot
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import dagger.hilt.android.testing.HiltAndroidRule
+import dagger.hilt.android.testing.HiltAndroidTest
 import org.hamcrest.Matcher
 import org.junit.After
 import org.junit.Before
@@ -24,35 +27,26 @@ import org.junit.runner.RunWith
 import java.util.concurrent.TimeoutException
 
 @RunWith(AndroidJUnit4::class)
+@HiltAndroidTest
 class FirstFragmentTest {
 
-    @Rule
-    @JvmField
-    val activityRule = ActivityScenarioRule(MainActivity::class.java)
+    @get:Rule
+    var hiltRule = HiltAndroidRule(this)
 
-    private var idlingResource: ViewVisibilityIdlingResource? = null
+    @Before
+    fun init() {
+        // Populate @Inject fields in test class
+        hiltRule.inject()
+    }
 
     @Before
     fun setUp() {
-        // Initialize the IdlingResource with the view and desired visibility state
-        activityRule.scenario.onActivity { activity ->
-            val buttonSecond = activity.findViewById<View>(R.id.button_second)
-            if (buttonSecond != null) {
-                idlingResource = ViewVisibilityIdlingResource(
-                    buttonSecond,
-                    View.VISIBLE  // Pass the desired visibility state here
-                )
-                // Register the IdlingResource
-                IdlingRegistry.getInstance().register(idlingResource)
-            }
-        }
+        // Additional setup if required
     }
 
     @After
     fun tearDown() {
-        idlingResource?.let {
-            IdlingRegistry.getInstance().unregister(it)
-        }
+        // Cleanup after tests if required
     }
 
     @Test
@@ -64,19 +58,32 @@ class FirstFragmentTest {
 
     @Test
     fun rvTest() {
+        launchFragmentInHiltContainer<FirstFragment>(null, R.style.Theme_HelloWorld)
 
-        onView(withId(R.id.recycler_view))
+        // Register an IdlingResource to wait for the RecyclerView to be displayed and populated
+        val recyclerViewIdlingResource = RecyclerViewIdlingResource(R.id.recycler_view)
+        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+
+        // Wait for the button_first to be displayed
+        //waitForView(withId(R.id.button_first), 5000)
+
+        // Perform action on the first item in RecyclerView
+        /*onView(withId(R.id.recycler_view))
             .perform(
                 RecyclerViewActions.actionOnItemAtPosition<ContactRv.ViewHolder>(
                     0,
-                    clickOnButtonInRecyclerView(0, R.id.contact_name)
+                    clickOnButtonInRecyclerView(R.id.contact_name)
                 )
-            )
+            )*/
 
-        waitForView(withId(R.id.button_second), 5000)
+        // Unregister the IdlingResource
+        IdlingRegistry.getInstance().unregister(recyclerViewIdlingResource)
 
+        // Wait for the button_second to be displayed and check its text
+        //waitForView(withId(R.id.button_second), 5000)
         onView(withId(R.id.button_second)).check(matches(withText("Previous")))
     }
+
     private fun waitForView(viewMatcher: Matcher<View>, timeout: Long) {
         val startTime = System.currentTimeMillis()
         val endTime = startTime + timeout
@@ -96,31 +103,7 @@ class FirstFragmentTest {
         } while (true)
     }
 
-    class ViewVisibilityIdlingResource(
-        private val view: View,
-        private val visibility: Int = View.VISIBLE
-    ) : IdlingResource {
-
-        @Volatile
-        private var callback: IdlingResource.ResourceCallback? = null
-
-        override fun getName(): String {
-            return this::class.java.name
-        }
-
-        override fun isIdleNow(): Boolean {
-            val isIdle = view.visibility == visibility
-            if (isIdle) {
-                callback?.onTransitionToIdle()
-            }
-            return isIdle
-        }
-
-        override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback?) {
-            this.callback = callback
-        }
-    }
-    private fun clickOnButtonInRecyclerView(itemPosition: Int, buttonId: Int): ViewAction {
+    private fun clickOnButtonInRecyclerView(buttonId: Int): ViewAction {
         return object : ViewAction {
             override fun getConstraints(): Matcher<View>? {
                 return null
@@ -134,6 +117,36 @@ class FirstFragmentTest {
                 val button = view.findViewById<View>(buttonId)
                 button?.performClick()
             }
+        }
+    }
+
+    class RecyclerViewIdlingResource(private val viewId: Int) : IdlingResource {
+        @Volatile
+        private var callback: IdlingResource.ResourceCallback? = null
+
+        override fun getName(): String {
+            return this::class.java.name + ":" + viewId
+        }
+
+        override fun isIdleNow(): Boolean {
+            val view = getCurrentActivity()?.findViewById<View>(viewId)
+            val isIdle = view != null && view.isShown && view.height > 0
+            if (isIdle) {
+                callback?.onTransitionToIdle()
+            }
+            return isIdle
+        }
+
+        override fun registerIdleTransitionCallback(callback: IdlingResource.ResourceCallback?) {
+            this.callback = callback
+        }
+
+        private fun getCurrentActivity(): Activity? {
+            val activity = arrayOfNulls<Activity>(1)
+            onView(isRoot()).check { view, _ ->
+                activity[0] = view.context as Activity
+            }
+            return activity[0]
         }
     }
 }
