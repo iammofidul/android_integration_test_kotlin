@@ -3,11 +3,17 @@ package com.flingo.helloworld
 import android.app.Activity
 import android.util.Log
 import android.view.View
+import androidx.core.os.bundleOf
+import androidx.navigation.Navigation
+import androidx.navigation.testing.TestNavHostController
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.IdlingResource
 import androidx.test.espresso.UiController
 import androidx.test.espresso.ViewAction
+import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
@@ -24,6 +30,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 
 @RunWith(AndroidJUnit4::class)
@@ -48,6 +55,28 @@ class FirstFragmentTest {
     fun tearDown() {
         // Cleanup after tests if required
     }
+    @Test
+    fun create_new_note(){
+        val navController = TestNavHostController(
+            ApplicationProvider.getApplicationContext())
+        val bundle = bundleOf().apply {
+            putLong("note_id",0L)
+        }
+        launchFragmentInHiltContainer<FirstFragment> {
+            this.viewLifecycleOwnerLiveData.observeForever { viewLifecycleOwner ->
+                if (viewLifecycleOwner != null) {
+                    // The fragment’s view has just been created
+                    navController.setGraph(R.navigation.nav_graph)
+                    navController.setCurrentDestination(R.id.FirstFragment,bundle)
+                    Navigation.setViewNavController(this.requireView(), navController)
+                }
+            }
+        }
+        onView(isRoot()).perform(waitId(R.id.contact_name, TimeUnit.SECONDS.toMillis(5)))
+        onView(withId(R.id.button_first)).perform(click())
+        //onView(withId(R.id.button_second)).check(matches(withText("Previous")))
+
+    }
 
     @Test
     fun navigateSecondFragment() {
@@ -61,23 +90,23 @@ class FirstFragmentTest {
         launchFragmentInHiltContainer<FirstFragment>(null, R.style.Theme_HelloWorld)
 
         // Register an IdlingResource to wait for the RecyclerView to be displayed and populated
-        val recyclerViewIdlingResource = RecyclerViewIdlingResource(R.id.recycler_view)
-        IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
+        //val recyclerViewIdlingResource = RecyclerViewIdlingResource(R.id.recycler_view)
+        //IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
 
         // Wait for the button_first to be displayed
-        //waitForView(withId(R.id.button_first), 5000)
+        waitForView(withId(R.id.button_first), 5000)
 
         // Perform action on the first item in RecyclerView
-        /*onView(withId(R.id.recycler_view))
+        onView(withId(R.id.recycler_view))
             .perform(
                 RecyclerViewActions.actionOnItemAtPosition<ContactRv.ViewHolder>(
                     0,
                     clickOnButtonInRecyclerView(R.id.contact_name)
                 )
-            )*/
+            )
 
         // Unregister the IdlingResource
-        IdlingRegistry.getInstance().unregister(recyclerViewIdlingResource)
+        //IdlingRegistry.getInstance().unregister(recyclerViewIdlingResource)
 
         // Wait for the button_second to be displayed and check its text
         //waitForView(withId(R.id.button_second), 5000)
